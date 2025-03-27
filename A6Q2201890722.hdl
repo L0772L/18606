@@ -1,39 +1,43 @@
-/**
- * 完全修正的 A6Q2201890722.hdl - 最终版
- * 修复所有"internal pin may only be fed once"错误
- */
 CHIP A6Q2201890722 {
     IN a, b, c, d;
     OUT f;
 
     PARTS:
-    // ===== 项1: ¬a∧¬b∧d =====
-    Not(in=a, out=nota_t1);
-    Not(in=b, out=notb_t1);
-    And(a=nota_t1, b=notb_t1, out=and1_t1);
-    And(a=and1_t1, b=d, out=term1);
+    // Not gates
+    Not(in=a, out=na);
+    Not(in=b, out=nb);
+    Not(in=c, out=nc);
+    Not(in=d, out=nd);
 
-    // ===== 项2: ¬a∧b∧¬d =====
-    Not(in=a, out=nota_t2);
-    Not(in=d, out=notd_t2);
-    And(a=nota_t2, b=b, out=and1_t2);
-    And(a=and1_t2, b=notd_t2, out=term2);
+    // Each term of the expression
+    And(a=na, b=nb, out=nab1);
+    And(a=nab1, b=nc, out=nabc1);
+    And(a=nabc1, b=d, out=t1);
 
-    // ===== 项3: a∧¬b∧¬c∧¬d =====
-    Not(in=b, out=notb_t3);
-    Not(in=c, out=notc_t3);
-    Not(in=d, out=notd_t3);
-    And(a=a, b=notb_t3, out=and1_t3);
-    And(a=notc_t3, b=notd_t3, out=and2_t3);
-    And(a=and1_t3, b=and2_t3, out=term3);
+    And(a=na, b=nb, out=nab2);
+    And(a=nab2, b=c, out=nabc2);
+    And(a=nabc2, b=d, out=t2);
 
-    // ===== 项4: a∧b∧c∧d =====
-    And(a=a, b=b, out=and1_t4);
-    And(a=c, b=d, out=and2_t4);
-    And(a=and1_t4, b=and2_t4, out=term4);
+    And(a=na, b=b, out=ab3);
+    And(a=ab3, b=nc, out=abc3);
+    And(a=abc3, b=nd, out=t3);
 
-    // ===== 组合所有项 =====
-    Or(a=term1, b=term2, out=or1);
-    Or(a=or1, b=term3, out=or2);
-    Or(a=or2, b=term4, out=f);
+    And(a=na, b=b, out=ab4);
+    And(a=ab4, b=c, out=abc4);
+    And(a=abc4, b=nd, out=t4);
+
+    And(a=a, b=nb, out=ab5);
+    And(a=ab5, b=nc, out=abc5);
+    And(a=abc5, b=nd, out=t5);
+
+    And(a=a, b=b, out=ab6);
+    And(a=ab6, b=c, out=abc6);
+    And(a=abc6, b=d, out=t6);
+
+    // Or all terms together
+    Or(a=t1, b=t2, out=o1);
+    Or(a=o1, b=t3, out=o2);
+    Or(a=o2, b=t4, out=o3);
+    Or(a=o3, b=t5, out=o4);
+    Or(a=o4, b=t6, out=f);
 }
