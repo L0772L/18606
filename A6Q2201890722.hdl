@@ -1,44 +1,38 @@
 /**
- * 完全修正的 A6Q2201890722.hdl
- * 修复了"internal pin may only be fed once"错误
+ * 完全修正的 A6Q2201890722.hdl - 最终版
+ * 修复所有"internal pin may only be fed once"错误
  */
 CHIP A6Q2201890722 {
     IN a, b, c, d;
     OUT f;
 
     PARTS:
-    // 生成所有需要的否定信号（每个信号只使用一次输出）
-    Not(in=a, out=nota);
-    Not(in=b, out=notb);
-    Not(in=c, out=notc); 
-    Not(in=d, out=notd);
-    
-    // 项1: ¬a∧¬b∧d
-    Not(in=a, out=nota1);  // 为该项单独创建¬a
-    Not(in=b, out=notb1);  // 为该项单独创建¬b
-    And(a=nota1, b=notb1, out=nota_notb1);
-    And(a=nota_notb1, b=d, out=term1);
-    
-    // 项2: ¬a∧b∧¬d
-    Not(in=a, out=nota2);  // 为该项单独创建¬a
-    Not(in=d, out=notd2);  // 为该项单独创建¬d
-    And(a=nota2, b=b, out=nota_b2);
-    And(a=nota_b2, b=notd2, out=term2);
-    
-    // 项3: a∧¬b∧¬c∧¬d
-    Not(in=b, out=notb3);  // 为该项单独创建¬b
-    Not(in=c, out=notc3);  // 为该项单独创建¬c
-    Not(in=d, out=notd3);  // 为该项单独创建¬d
-    And(a=a, b=notb3, out=a_notb3);
-    And(a=notc3, b=notd3, out=notc_notd3);
-    And(a=a_notb3, b=notc_notd3, out=term3);
-    
-    // 项4: a∧b∧c∧d
-    And(a=a, b=b, out=a_b4);
-    And(a=c, b=d, out=c_d4);
-    And(a=a_b4, b=c_d4, out=term4);
-    
-    // 组合所有项
+    // ===== 项1: ¬a∧¬b∧d =====
+    Not(in=a, out=nota_t1);
+    Not(in=b, out=notb_t1);
+    And(a=nota_t1, b=notb_t1, out=and1_t1);
+    And(a=and1_t1, b=d, out=term1);
+
+    // ===== 项2: ¬a∧b∧¬d =====
+    Not(in=a, out=nota_t2);
+    Not(in=d, out=notd_t2);
+    And(a=nota_t2, b=b, out=and1_t2);
+    And(a=and1_t2, b=notd_t2, out=term2);
+
+    // ===== 项3: a∧¬b∧¬c∧¬d =====
+    Not(in=b, out=notb_t3);
+    Not(in=c, out=notc_t3);
+    Not(in=d, out=notd_t3);
+    And(a=a, b=notb_t3, out=and1_t3);
+    And(a=notc_t3, b=notd_t3, out=and2_t3);
+    And(a=and1_t3, b=and2_t3, out=term3);
+
+    // ===== 项4: a∧b∧c∧d =====
+    And(a=a, b=b, out=and1_t4);
+    And(a=c, b=d, out=and2_t4);
+    And(a=and1_t4, b=and2_t4, out=term4);
+
+    // ===== 组合所有项 =====
     Or(a=term1, b=term2, out=or1);
     Or(a=or1, b=term3, out=or2);
     Or(a=or2, b=term4, out=f);
