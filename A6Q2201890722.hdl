@@ -1,0 +1,31 @@
+CHIP A6Q2201890722 {
+    IN a, b, c, d;
+    OUT f;
+
+    PARTS:
+    // First term: ¬a∧¬b∧d
+    Not(in=a, out=nota);
+    Not(in=b, out=notb);
+    And(a=nota, b=notb, out=nota_notb);
+    And(a=nota_notb, b=d, out=term1);
+
+    // Second term: ¬a∧b∧¬d
+    Not(in=d, out=notd);
+    And(a=nota, b=b, out=nota_b);
+    And(a=nota_b, b=notd, out=term2);
+
+    // Third term: a∧¬b∧¬c∧¬d
+    And(a=a, b=notb, out=a_notb);
+    And(a=notc, b=notd, out=notc_notd);
+    And(a=a_notb, b=notc_notd, out=term3);
+
+    // Fourth term: a∧b∧c∧d
+    And(a=a, b=b, out=a_b);
+    And(a=c, b=d, out=c_d);
+    And(a=a_b, b=c_d, out=term4);
+
+    // Combine all terms with OR operations
+    Or(a=term1, b=term2, out=or1);
+    Or(a=or1, b=term3, out=or2);
+    Or(a=or2, b=term4, out=f);
+}
