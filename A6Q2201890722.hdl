@@ -1,37 +1,44 @@
 /**
- * 实现布尔函数: 
- * (¬a∧¬b∧¬c∧d)∨(¬a∧¬b∧c∧d)∨(¬a∧b∧¬c∧¬d)∨(¬a∧b∧c∧¬d)∨(a∧¬b∧¬c∧¬d)∨(a∧b∧c∧d)
- * 最小化逻辑门数量
- * 文件名: A6Q2201890722.hdl
+ * 完全修正的 A6Q2201890722.hdl
+ * 修复了"internal pin may only be fed once"错误
  */
 CHIP A6Q2201890722 {
     IN a, b, c, d;
     OUT f;
 
     PARTS:
-    // 第一项: ¬a∧¬b∧d (合并了原始的前两项)
+    // 生成所有需要的否定信号（每个信号只使用一次输出）
     Not(in=a, out=nota);
     Not(in=b, out=notb);
-    And(a=nota, b=notb, out=nota_notb);
-    And(a=nota_notb, b=d, out=term1);
-
-    // 第二项: ¬a∧b∧¬d (合并了原始的三、四项)
+    Not(in=c, out=notc); 
     Not(in=d, out=notd);
-    And(a=nota, b=b, out=nota_b);
-    And(a=nota_b, b=notd, out=term2);
-
-    // 第三项: a∧¬b∧¬c∧¬d
-    And(a=a, b=notb, out=a_notb);
-    Not(in=c, out=notc);
-    And(a=notc, b=notd, out=notc_notd);
-    And(a=a_notb, b=notc_notd, out=term3);
-
-    // 第四项: a∧b∧c∧d
-    And(a=a, b=b, out=a_b);
-    And(a=c, b=d, out=c_d);
-    And(a=a_b, b=c_d, out=term4);
-
-    // 组合所有项 (OR运算)
+    
+    // 项1: ¬a∧¬b∧d
+    Not(in=a, out=nota1);  // 为该项单独创建¬a
+    Not(in=b, out=notb1);  // 为该项单独创建¬b
+    And(a=nota1, b=notb1, out=nota_notb1);
+    And(a=nota_notb1, b=d, out=term1);
+    
+    // 项2: ¬a∧b∧¬d
+    Not(in=a, out=nota2);  // 为该项单独创建¬a
+    Not(in=d, out=notd2);  // 为该项单独创建¬d
+    And(a=nota2, b=b, out=nota_b2);
+    And(a=nota_b2, b=notd2, out=term2);
+    
+    // 项3: a∧¬b∧¬c∧¬d
+    Not(in=b, out=notb3);  // 为该项单独创建¬b
+    Not(in=c, out=notc3);  // 为该项单独创建¬c
+    Not(in=d, out=notd3);  // 为该项单独创建¬d
+    And(a=a, b=notb3, out=a_notb3);
+    And(a=notc3, b=notd3, out=notc_notd3);
+    And(a=a_notb3, b=notc_notd3, out=term3);
+    
+    // 项4: a∧b∧c∧d
+    And(a=a, b=b, out=a_b4);
+    And(a=c, b=d, out=c_d4);
+    And(a=a_b4, b=c_d4, out=term4);
+    
+    // 组合所有项
     Or(a=term1, b=term2, out=or1);
     Or(a=or1, b=term3, out=or2);
     Or(a=or2, b=term4, out=f);
